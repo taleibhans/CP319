@@ -1,0 +1,79 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity tb_Cache_Hierarchy is
+end tb_Cache_Hierarchy;
+
+architecture Behavioral of tb_Cache_Hierarchy is
+    -- Signals for cache_sys ports
+    signal clk : STD_LOGIC := '0';
+    signal reset : STD_LOGIC := '1';
+    signal addr : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+    signal data_in : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+    signal data_out : STD_LOGIC_VECTOR(31 downto 0);
+    signal write_enable : STD_LOGIC := '0';
+
+    -- Clock period constant
+    constant clk_period : time := 10 ns;
+
+    -- Instantiate cache_sys
+    component cache_sys is
+        Port (
+            clk : in STD_LOGIC;
+            reset : in STD_LOGIC;
+            addr : in STD_LOGIC_VECTOR(31 downto 0);
+            data_in : in STD_LOGIC_VECTOR(31 downto 0);
+            data_out : out STD_LOGIC_VECTOR(31 downto 0);
+            write_enable : in STD_LOGIC
+        );
+    end component;
+
+begin
+    -- Instantiate the cache_sys unit under test (UUT)
+    uut: cache_sys
+        Port Map (
+            clk => clk,
+            reset => reset,
+            addr => addr,
+            data_in => data_in,
+            data_out => data_out,
+            write_enable => write_enable
+        );
+
+    -- Clock Generation Process
+    clk_process : process
+    begin
+        clk <= '0';
+        wait for clk_period / 2;
+        clk <= '1';
+        wait for clk_period / 2;
+    end process;
+
+    -- Stimulus Process
+    stim_process : process
+    begin
+        -- Step 1: Reset the system
+        reset <= '1';
+        wait for clk_period * 2;
+        reset <= '0';
+
+        -- Step 2: Test Case 1 - Miss in both L1 and L2
+        addr <= x"00000010";  -- Address that causes a miss in L1 and L2
+        data_in <= x"12345678";
+        write_enable <= '1';
+        wait for clk_period;
+        write_enable <= '0';
+
+        -- Step 3: Test Case 2 - Hit in L1
+        addr <= x"00000010";  -- Reuse the same address to test L1 hit
+        wait for clk_period;
+
+        -- Step 4: Test Case 3 - Miss in L1, hit in L2
+        addr <= x"00000020";  -- Address stored in L2 but not in L1
+        wait for clk_period;
+
+        -- Final Step: End simulation
+        wait;
+    end process;
+end Behavioral;
