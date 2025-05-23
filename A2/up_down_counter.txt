@@ -1,0 +1,36 @@
+library IEEE;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity up_down_counter is
+    Port (
+        clk       : in STD_LOGIC;                          -- Clock signal
+        reset     : in STD_LOGIC;                          -- Reset signal
+        load      : in STD_LOGIC;                          -- Load enable
+        up_down   : in STD_LOGIC;                          -- Direction control (1 = Up, 0 = Down)
+        load_data : in STD_LOGIC_VECTOR (7 downto 0);      -- Data to load
+        counter   : out STD_LOGIC_VECTOR (7 downto 0)      -- 8-bit counter output
+    );
+end up_down_counter;
+
+architecture Behavioral of up_down_counter is
+    signal temp_counter : STD_LOGIC_VECTOR (7 downto 0) := (others => '0'); -- Internal counter signal
+begin
+    process (clk, reset)
+    begin
+        if reset = '1' then
+            temp_counter <= (others => '0'); -- Reset counter to 0
+        elsif rising_edge(clk) then
+            if load = '1' then
+                temp_counter <= load_data;  -- Load the input data
+            elsif up_down = '1' then
+                temp_counter <= temp_counter + 1; -- Increment counter
+            else
+                temp_counter <= temp_counter - 1; -- Decrement counter
+            end if;
+        end if;
+    end process;
+
+    counter <= temp_counter; -- Assign internal counter to output
+end Behavioral;

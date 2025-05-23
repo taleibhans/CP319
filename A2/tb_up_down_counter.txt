@@ -1,0 +1,73 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_up_down_counter is
+end tb_up_down_counter;
+
+architecture Behavioral of tb_up_down_counter is
+    -- Component Declaration
+    component up_down_counter
+        Port (
+            clk       : in STD_LOGIC;
+            reset     : in STD_LOGIC;
+            load      : in STD_LOGIC;
+            up_down   : in STD_LOGIC;
+            load_data : in STD_LOGIC_VECTOR (7 downto 0);
+            counter   : out STD_LOGIC_VECTOR (7 downto 0)
+        );
+    end component;
+
+    -- Signal Declaration
+    signal clk       : STD_LOGIC := '0';
+    signal reset     : STD_LOGIC := '0';
+    signal load      : STD_LOGIC := '0';
+    signal up_down   : STD_LOGIC := '1';
+    signal load_data : STD_LOGIC_VECTOR (7 downto 0) := (others => '0');
+    signal counter   : STD_LOGIC_VECTOR (7 downto 0);
+
+begin
+    -- Instantiate the Unit Under Test (UUT)
+    uut: up_down_counter
+        Port map (
+            clk => clk,
+            reset => reset,
+            load => load,
+            up_down => up_down,
+            load_data => load_data,
+            counter => counter
+        );
+
+    -- Clock Generation
+    clk_process : process
+    begin
+        while now < 1 ms loop
+            clk <= '0';
+            wait for 10 ns;
+            clk <= '1';
+            wait for 10 ns;
+        end loop;
+        wait;
+    end process;
+
+    -- Stimulus Process
+    stimulus_process : process
+    begin
+        -- Test Reset
+        reset <= '1'; wait for 20 ns;
+        reset <= '0'; wait for 20 ns;
+
+        -- Test Counting Up
+        up_down <= '1'; wait for 200 ns;
+
+        -- Test Counting Down
+        up_down <= '0'; wait for 200 ns;
+
+        -- Test Load Functionality
+        load <= '1';
+        load_data <= "10101010"; wait for 20 ns;
+        load <= '0'; wait for 200 ns;
+
+        -- End Simulation
+        wait;
+    end process;
+end Behavioral;
